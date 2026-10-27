@@ -1,0 +1,36 @@
+KARVON.STUDIO — BRAND ASSET KIT
+
+Brand source
+The supplied brand board is the reference. The primary logo and mark in this package are extracted from the larger logo in the supplied reference image, then cleaned to transparent PNGs. They have not been manually redrawn into exact vector paths.
+
+CORE COLOURS
+Deep Charcoal: #1A1E24
+Off-White: #F7F5F0
+Burnt Ochre: #B55A30
+Muted Slate Blue: #5E7285
+
+USAGE
+- Primary logo on light surfaces: karvon-primary-logo-transparent.png
+- Dark surface: use the white monochrome logo PNG; check contrast and edges before production.
+- Standalone mark: karvon-geometric-k-transparent.png
+- Wordmark: karvon-wordmark-transparent.png
+- Favicons: use 32x32 or 48x48 for browser tab assets; 180x180 for Apple touch icon; 192x192 and 512x512 for Android/PWA.
+- Social preview: use 1200x630 PNG/JPG.
+- CSS variables are supplied in brand-colors.css.
+
+TRANSPARENCY
+Transparent PNGs are raster extractions from the reference. Because the original is a presentation image, anti-aliasing and background-removal artefacts may remain near edges. Inspect on both light and dark backgrounds.
+
+SVG NOTE
+The supplied .svg files are SVG containers with embedded PNGs for convenient placement, not true vector paths. They scale as a container but do not gain true vector sharpness. For print-quality or final trademark work, have the reference logo traced into real SVG paths and visually compare it to the source board.
+
+WORDMARK VARIANTS
+The reference shows medium, bold, and lightweight typesetting examples. This pack includes the extracted wordmark from the main reference logo and monochrome color treatments. It does not claim to reproduce all three font weights exactly because the original font files were not provided.
+
+NOT INCLUDED / NEEDS APPROVAL
+- Exact editable source design file (AI/Figma)
+- Verified font family and licensed font files
+- Manually traced, path-based vector logo
+- Trademark or logo-similarity clearance
+
+Do not claim this is an exact vector reconstruction. It is a reference-derived asset pack designed to preserve the supplied identity as closely as possible with the available source image.

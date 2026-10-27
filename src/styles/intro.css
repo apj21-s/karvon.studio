@@ -1,0 +1,44 @@
+/* Cinematic intro overlay. Shown before first paint by the inline gate (html.intro-on). */
+.intro {
+  display: none; position: fixed; inset: 0; z-index: 100;
+  background: #e9e5df;
+  transition: opacity 0.8s var(--ease-in-out);
+}
+html.intro-on .intro, html.intro-leaving .intro { display: block; }
+.intro.is-leaving { opacity: 0; pointer-events: none; }
+.intro__stage { position: absolute; inset: 0; overflow: hidden; }
+.intro__paper {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(120% 90% at 30% 20%, rgba(255, 255, 255, 0.35), transparent 60%),
+    var(--grain), #e9e5df;
+}
+.intro__canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; }
+.intro.is-3d .intro__canvas { opacity: 1; }
+
+/* Lockup: positions are written by lockup.js as CSS variables (px). */
+.intro__lockup { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
+.intro__markbox { position: absolute; left: var(--mx, 50%); top: var(--my, 30%); width: var(--mw, 200px); opacity: 0; }
+.intro__mark { width: 100%; height: auto; overflow: visible; }
+.intro__mark polygon { transform-box: fill-box; transform-origin: center; }
+.intro.is-3d .intro__markbox { display: none; }
+.intro__word, .intro__studio {
+  position: absolute; left: var(--cx, 50%); white-space: nowrap; color: #26292d;
+  transform: translateX(-50%); font-family: var(--font-display); line-height: 1;
+}
+.intro__word { top: var(--wy, 60%); font-weight: 600; font-size: var(--wf, 64px); letter-spacing: var(--wl, 0.06em); }
+.intro__word span { display: inline-block; opacity: 0; }
+.intro__studio { top: var(--sy, 70%); font-weight: 400; font-size: var(--sf, 22px); letter-spacing: var(--sl, 0.32em); opacity: 0; color: #2e3236; }
+
+.intro__skip {
+  position: absolute; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 2;
+  min-height: 44px; padding: 0 16px; cursor: pointer;
+  background: rgba(247, 245, 240, 0.72); color: var(--charcoal);
+  border: 1px solid rgba(26, 30, 36, 0.18);
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase;
+  transition: background-color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.intro__skip:hover { background: var(--off-white); border-color: rgba(26, 30, 36, 0.4); }
+
+/* While the intro runs, the page underneath is inert and invisible to scrolling. */
+html.intro-on .nav, html.intro-on main, html.intro-on .footer { visibility: hidden; }

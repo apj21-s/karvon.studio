@@ -1,0 +1,50 @@
+:root {
+  /* Brand palette (KARVON brand guidelines) */
+  --charcoal: #1a1e24;
+  --off-white: #f7f5f0;
+  --ochre: #b55a30;
+  --slate: #5e7285;
+
+  /* Derived tones */
+  --charcoal-2: #23282f;      /* raised dark surface */
+  --ink-soft: #3a414b;        /* secondary text on light */
+  --slate-light: #93a3b2;     /* slate for text on charcoal (AA) */
+  --paper: #efece5;           /* slightly deeper paper for plates */
+  --ochre-deep: #9c4a25;      /* hover / pressed */
+  --rule: rgba(94, 114, 133, 0.32);
+  --rule-strong: rgba(94, 114, 133, 0.6);
+  --rule-dark: rgba(147, 163, 178, 0.24);
+
+  /* Type */
+  --font-display: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+  --font-body: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+
+  --fs-display: clamp(2.35rem, 1.05rem + 4.6vw, 5.1rem);
+  --fs-h2: clamp(1.9rem, 1.15rem + 3.1vw, 3.9rem);
+  --fs-h3: clamp(1.08rem, 1rem + 0.35vw, 1.3rem);
+  --fs-lead: clamp(1.06rem, 0.98rem + 0.4vw, 1.3rem);
+  --fs-body: 1.0625rem;
+  --fs-small: 0.9375rem;
+  --fs-mono: 0.75rem;
+
+  /* Space */
+  --gutter: clamp(20px, 4.2vw, 56px);
+  --maxw: 1360px;
+  --section-y: clamp(88px, 12vw, 176px);
+  --nav-h: 72px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 180ms;
+  --dur: 320ms;
+  --dur-reveal: 640ms;
+
+  /* Faint paper grain (procedural, no image request) */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .1 0 0 0 0 .1 0 0 0 .055 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@media (max-width: 720px) {
+  :root { --nav-h: 64px; }
+}

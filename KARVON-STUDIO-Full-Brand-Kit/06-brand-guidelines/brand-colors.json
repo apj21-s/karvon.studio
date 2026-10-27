@@ -1,0 +1,25 @@
+{
+  "brand": "KARVON.STUDIO",
+  "colors": [
+    {
+      "name": "Deep Charcoal",
+      "hex": "#1A1E24",
+      "role": "Primary typography and dark surfaces"
+    },
+    {
+      "name": "Off-White",
+      "hex": "#F7F5F0",
+      "role": "Primary light background"
+    },
+    {
+      "name": "Burnt Ochre",
+      "hex": "#B55A30",
+      "role": "Interactive accents and highlights"
+    },
+    {
+      "name": "Muted Slate Blue",
+      "hex": "#5E7285",
+      "role": "Secondary accents and borders"
+    }
+  ]
+}
