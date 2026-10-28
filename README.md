@@ -29,7 +29,7 @@ full screen (add `&forcegl=1` in headless/software-GL browsers); `tools/capture.
 
 ## Before launch
 
-- **Contact email:** `karvon.studio@gmail.com`, set in `SITE.email` (`src/config/site.js`).
+- **Contact email:** `hello.karvon.studio@gmail.com`, set in `SITE.email` (`src/config/site.js`).
 - **Domain:** `SITE.url` is the GitHub Pages URL. Change it if a custom domain is added.
 - **ACEIIIT links** (`https://aceiiit.in`, `https://mock.aceiiit.in`) were taken from the ACEIIIT code; confirm them.
 - **Brand approval:** the K is a traced vector derived from the brand-kit PNG (silhouette IoU 0.99), and the

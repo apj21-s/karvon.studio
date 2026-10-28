@@ -62,9 +62,9 @@ test.describe('content and links', () => {
   test('contact email is live', async ({ page }) => {
     await page.goto('/');
     const mail = page.locator('.contact__actions a[href^="mailto:"]');
-    await expect(mail).toContainText('karvon.studio@gmail.com');
-    await expect(mail).toHaveAttribute('href', 'mailto:karvon.studio@gmail.com');
-    await expect(page.locator('.footer a[href="mailto:karvon.studio@gmail.com"]')).toHaveCount(1);
+    await expect(mail).toContainText('hello.karvon.studio@gmail.com');
+    await expect(mail).toHaveAttribute('href', 'mailto:hello.karvon.studio@gmail.com');
+    await expect(page.locator('.footer a[href="mailto:hello.karvon.studio@gmail.com"]')).toHaveCount(1);
   });
 
   test('ACEIIIT links use the verified URLs and open safely', async ({ page }) => {

@@ -9,7 +9,7 @@ export const SITE = {
   // Change this if a custom domain is added — canonical, og:url and og:image use it.
   url: 'https://apj21-s.github.io/karvon.studio/',
 
-  email: 'karvon.studio@gmail.com',
+  email: 'hello.karvon.studio@gmail.com',
 
   title: 'KARVON.STUDIO',
   description:
