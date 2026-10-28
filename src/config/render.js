@@ -56,59 +56,55 @@ export function headMeta() {
   return lines.join('\n    ');
 }
 
-export function navLinks(cls = 'nav__link') {
-  return SITE.nav.map((n) => `<li><a class="${cls}" href="${n.href}">${esc(n.label)}</a></li>`).join('');
-}
 
+// ACEIIIT, presented in its own visual language: warm paper, deep ink, a gold accent, and the
+// product's own method illustrations laid out like papers on a desk.
 export function products() {
-  return SITE.products.map((p) => `
-      <article class="product" id="product-${p.id}" aria-labelledby="product-${p.id}-name">
-        <header class="product__head reveal">
-          <p class="product__index mono">Product ${esc(p.index)} <span aria-hidden="true">/</span> ${esc(p.category)}</p>
-          <h3 class="product__name" id="product-${p.id}-name">${esc(p.name)}</h3>
-          <div class="product__logo"><img src="${p.logo}" alt="${esc(p.name)} logo" width="160" height="160" loading="lazy" decoding="async"></div>
-        </header>
-        <div class="product__body">
-          <p class="product__summary reveal">${esc(p.summary)}</p>
-          <dl class="product__facts reveal">
-            <div><dt class="mono">Who it serves</dt><dd>${esc(p.audience)}</dd></div>
-            <div><dt class="mono">The problem</dt><dd>${esc(p.problem)}</dd></div>
-          </dl>
-          <ol class="product__flow reveal" aria-label="How an ACEIIIT attempt flows">
-            ${p.flow.map((f, i) => `<li><span class="mono">${String(i + 1).padStart(2, '0')}</span>${esc(f)}</li>`).join('')}
-          </ol>
-          <ul class="product__caps" aria-label="Capabilities">
-            ${p.capabilities.map((c) => `<li class="reveal"><h4>${esc(c.title)}</h4><p>${esc(c.text)}</p></li>`).join('')}
-          </ul>
-          <p class="product__fit reveal">${esc(p.name)} is how KARVON works in practice: a narrow, well-understood problem, a product built to solve it properly, and continuous improvement from how students actually use it.</p>
-          <div class="product__actions reveal">
-            ${p.links.map((l) => `<a class="btn ${l.primary ? 'btn--primary' : 'btn--ghost-light'}" href="${esc(l.href)}"${linkAttrs(l.href)}>${esc(l.label)}<span class="btn__arrow" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>`).join('')}
-          </div>
-        </div>
-      </article>`).join('');
+  return SITE.products.map((p) => {
+    const primary = p.links.find((l) => l.primary) || p.links[0];
+    const others = p.links.filter((l) => l !== primary);
+    return `
+          <article class="product" id="product-${p.id}" aria-labelledby="product-${p.id}-name">
+            <div class="product__intro">
+              <div class="product__brand">
+                <div class="product__logo"><img src="${p.logo}" alt="${esc(p.name)} logo" width="160" height="160" decoding="async"></div>
+                <p class="product__status"><span aria-hidden="true"></span>Live</p>
+              </div>
+              <h3 class="product__name" id="product-${p.id}-name">${esc(p.name)}</h3>
+              <p class="product__summary">${esc(p.summary)}</p>
+              <ol class="product__flow" aria-label="How an ${esc(p.name)} attempt flows">
+                ${p.flow.map((f) => `<li>${esc(f)}</li>`).join('')}
+              </ol>
+              <div class="product__actions">
+                <a class="product__btn" href="${esc(primary.href)}"${linkAttrs(primary.href)}>${esc(primary.label)}<span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>
+                ${others.map((l) => `<a class="product__link" href="${esc(l.href)}"${linkAttrs(l.href)}>${esc(l.label)}<span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>`).join('')}
+              </div>
+            </div>
+            <div class="product__desk">
+              <div class="desk">
+                ${(p.method || []).map((m, i) => `<figure class="sheet sheet--${i + 1}"><img src="${m.src}" alt="${esc(m.alt)}" width="${m.w}" height="${m.h}" decoding="async"></figure>`).join('')}
+              </div>
+              <ol class="desk__notes">
+                ${(p.method || []).map((m, i) => `<li><span class="mono">${String(i + 1).padStart(2, '0')}</span><strong>${esc(m.label)}</strong><span class="desk__text">${esc(m.text)}</span></li>`).join('')}
+              </ol>
+            </div>
+            <ul class="product__caps" aria-label="What it does">
+              ${p.capabilities.map((c) => `<li><h4>${esc(c.title)}</h4><p>${esc(c.text)}</p></li>`).join('')}
+            </ul>
+          </article>`;
+  }).join('');
 }
 
 export function contact() {
-  if (SITE.email) {
-    return `<a class="btn btn--primary btn--large" href="mailto:${esc(SITE.email)}">${esc(SITE.email)}<span class="btn__arrow" aria-hidden="true">→</span></a>`;
-  }
-  return `<p class="contact__pending mono">A direct contact address will be published here shortly.</p>`;
+  return `<a class="btn-modern btn-modern--light" href="mailto:${esc(SITE.email)}"><span class="btn-modern__small">Write to us</span><span class="btn-modern__big">${esc(SITE.email)}</span></a>`;
 }
 
-export function footerContact() {
-  return SITE.email ? `<li><a class="footer__link" href="mailto:${esc(SITE.email)}">${esc(SITE.email)}</a></li>` : '';
+export function footerLinks() {
+  const p = SITE.products.map((x) => { const l = x.links.find((y) => y.primary) || x.links[0]; return `<a href="${esc(l.href)}"${linkAttrs(l.href)}>${esc(x.name)}<span class="sr-only"> (opens in a new tab)</span></a>`; });
+  return [`<a href="mailto:${esc(SITE.email)}">${esc(SITE.email)}</a>`, ...p, `<a href="#main">Top ↑</a>`].join('');
 }
 
-export function footerProducts() {
-  return SITE.products
-    .map((p) => { const l = p.links.find((x) => x.primary) || p.links[0]; return `<li><a class="footer__link" href="${esc(l.href)}"${linkAttrs(l.href)}>${esc(p.name)}<span class="sr-only"> (opens in a new tab)</span></a></li>`; })
-    .join('');
-}
 
-export function introConfigScript() {
-  // Pre-paint gate: decides before first paint whether the intro overlay is shown.
-  const c = SITE.intro;
-  return `(function(){var d=document.documentElement,c=${JSON.stringify({ k: c.sessionKey, r: c.repeat, e: c.enabled })};try{var q=location.search,force=/[?&]intro=1(&|$)/.test(q),seen=sessionStorage.getItem(c.k)==='1',rm=matchMedia('(prefers-reduced-motion: reduce)').matches;if(!c.e&&!force)return;if(force||!seen){d.classList.add('intro-on',rm?'intro-reduced':'intro-full')}else if(c.r==='short'){d.classList.add('intro-on','intro-short')}}catch(e){}})();`;
-}
+
 
 export const year = () => String(new Date().getFullYear());

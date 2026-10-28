@@ -13,6 +13,7 @@ const S = 10 / MARK_SIZE.w;
 const toWorld = ([u, v]) => [(u - MARK_SIZE.w / 2) * S, (MARK_SIZE.h / 2 - v) * S];
 const POLY = Object.fromEntries(PIECES.map((p) => [p.id, p.points.map(toWorld)]));
 const pt = (id, i) => POLY[id][i];
+const W = (pts) => pts.map(toWorld); // mark coordinates → world
 const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
 const centroid = (pts) => [pts.reduce((s, p) => s + p[0], 0) / pts.length, pts.reduce((s, p) => s + p[1], 0) / pts.length];
 const dir = (a, b) => { const x = b[0] - a[0], y = b[1] - a[1], l = Math.hypot(x, y); return [x / l, y / l, 0]; };
@@ -40,7 +41,11 @@ function ctrack(keys) {
 // show: [tIn, tOut] visibility window   faces: { front, back, side } colour tracks
 const stemB = bounds(['chimney', 'stem']);
 const stemPivot = [(stemB.x0 + stemB.x1) / 2, (stemB.y0 + stemB.y1) / 2];
-const CHIMNEY_DROP = -(pt('chimney', 3)[1] - pt('stem', 0)[1]); // closes the channel during the plain-K phase
+// Until ~3.6s the reference shows one tall plain bar: the chimney without its flag, plus a filler
+// over the diagonal channel. The flag unfolds and the filler lifts away as the slate pieces arrive.
+const BAR_TOP = W([[210.3, 161.7], [374.1, 0], [374.1, 474.3], [210.3, 645.5]]);
+const FLAG = W([[158.9, 211.5], [210.3, 161.7], [210.3, 342.3], [158.9, 389.4]]);
+const FILLER = W([[210.3, 645.5], [374.1, 474.3], [374.1, 586], [210.3, 751]]);
 
 const pale = flat('#eeeae2');
 
@@ -50,34 +55,41 @@ function logoSpecs() {
 
   return [
     {
-      id: 'stemGroup', hinge: { p: stemPivot, axis: [0, 1, 0] }, show: [1.0, 99],
+      id: 'stemGroup', hinge: { p: stemPivot, axis: [0, 1, 0] }, show: [1.05, 99],
       pos: track([[1.0, [0.8, 13, 1.0]], [1.55, [0, 0, 0.6], 'outCubic'], [1.82, [0, 0, 1.2], 'inOutSine'], [2.1, [0, 0, 0.36], 'inOutSine'], ...settle(0.34)]),
       fold: track([[1.6, 180], [2.08, 0, 'inOutCubic'], [3.8, 0], [4.35, -24, 'inOutSine'], [5.3, 0, 'inOutCubic']]),
       spin: track([[1.0, [0, 0, -9]], [1.55, [0, 0, 0], 'outCubic']]),
       children: [
         {
-          id: 'chimney', mesh: 'chimney',
-          pos: track([[3.6, [0, CHIMNEY_DROP, 0]], [4.15, [0, 0, 0.18], 'inOutCubic'], [4.6, [0, 0, 0]]]),
-          faces: {
-            front: resolve(['#625e58', '#30373d'], flat(FINAL.charcoal), 5.4, 6.2),
-            back: ctrack([[0, pale]]), side: ctrack([[0, flat('#b9b4aa')], [5, flat('#b9b4aa')], [6, flat('#3b4045')]]),
-          },
+          id: 'chimney', mesh: 'chimney', meshShow: [4.2, 99],
+          pos: track([[3.6, [0, 0, 0]], [4.15, [0, 0, 0.18], 'inOutCubic'], [4.6, [0, 0, 0]]]),
+          faces: barFaces(),
           grad: stemB,
+          children: [
+            { id: 'barTop', poly: BAR_TOP, show: [0, 4.2], faces: barFaces(), grad: stemB },
+            {
+              id: 'flag', poly: FLAG, hinge: { p: [FLAG[1][0], (FLAG[1][1] + FLAG[2][1]) / 2], axis: [0, 1, 0] }, show: [3.55, 4.2],
+              fold: track([[3.55, 95], [4.05, 0, 'outCubic']]),
+              faces: barFaces(), grad: stemB,
+            },
+          ],
+        },
+        {
+          id: 'filler', poly: FILLER, hinge: { p: mid(FILLER[3], FILLER[2]), axis: dir(FILLER[3], FILLER[2]) }, show: [0, 4.05],
+          fold: track([[3.62, 0], [4.05, -120, 'inCubic']]),
+          faces: barFaces(), grad: stemB,
         },
         {
           id: 'stem', mesh: 'stem',
-          faces: {
-            front: resolve(['#57544f', '#2e353b'], flat(FINAL.charcoal), 5.4, 6.2),
-            back: ctrack([[0, pale]]), side: ctrack([[0, flat('#b9b4aa')], [5, flat('#b9b4aa')], [6, flat('#3b4045')]]),
-          },
+          faces: barFaces(),
           grad: stemB,
         },
       ],
     },
     {
-      id: 'arm', mesh: 'arm', hinge: { p: mid(pt('arm', 1), pt('arm', 2)), axis: [1, 0, 0] }, show: [2.36, 99],
-      pos: track([[2.36, [1.0, 1.2, 1.5]], [2.8, [0, 0, 0.55], 'inOutCubic'], ...settle(0.5)]),
-      fold: track([[2.36, -96], [2.8, 0, 'inOutCubic']]),
+      id: 'arm', mesh: 'arm', hinge: { p: mid(pt('arm', 1), pt('arm', 2)), axis: [1, 0, 0] }, show: [2.55, 99],
+      pos: track([[2.55, [0, 0, 0.55]], ...settle(0.5)]),
+      fold: track([[2.55, -92], [2.97, 0, 'inOutCubic']]),
       faces: {
         front: resolve(['#8a6d55', '#3b3e41'], flat(FINAL.charcoal)),
         back: ctrack([[0, flat('#9c7a5c')]]), side: ctrack([[0, flat('#6e5a48')], [6, flat('#3b4045')]]),
@@ -85,9 +97,9 @@ function logoSpecs() {
       grad: bounds(['arm']),
     },
     {
-      id: 'leg', mesh: 'leg', hinge: { p: mid(pt('leg', 0), pt('leg', 1)), axis: dir(pt('leg', 0), pt('leg', 1)) }, show: [2.6, 99],
-      pos: track([[2.6, [0, 0, 0.66]], [3.32, [0, 0, 0.44], 'inOutCubic'], ...settle(0.42)]),
-      fold: track([[2.6, -176], [3.32, 0, 'inOutCubic']]),
+      id: 'leg', mesh: 'leg', hinge: { p: mid(pt('leg', 0), pt('leg', 1)), axis: dir(pt('leg', 0), pt('leg', 1)) }, show: [2.75, 99],
+      pos: track([[2.75, [0, 0, 0.5]], [3.55, [0, 0, 0.44], 'inOutCubic'], ...settle(0.42)]),
+      fold: track([[2.75, -100], [3.55, 0, 'outCubic']]),
       faces: {
         front: resolve(['#3a3d40', '#a27a58'], flat(FINAL.charcoal), 5.7, 6.3),
         back: ctrack([[0, ['#b98f68', '#a9825d']]]), side: ctrack([[0, flat('#8a6a4b')], [6, flat('#3b4045')]]),
@@ -111,7 +123,7 @@ function logoSpecs() {
       ],
     },
     {
-      id: 'bottom', hinge: { p: [pt('charBot', 1)[0], pt('charBot', 0)[1]], axis: [1, 0, 0] }, show: [3.95, 99],
+      id: 'bottom', hinge: { p: [pt('charBot', 1)[0], pt('charBot', 0)[1]], axis: [1, 0, 0] }, show: [4.08, 99],
       pos: track([[3.95, [0.3, -1.2, 0.5]], [4.55, [0, 0, 0.3], 'outCubic'], ...settle(0.3)]),
       fold: track([[3.95, 125], [4.5, 35, 'outCubic'], [5.2, 0, 'inOutCubic']]),
       children: [
@@ -120,9 +132,9 @@ function logoSpecs() {
       ],
     },
     {
-      id: 'cube', hinge: { p: centroid([pt('cubeTop', 0), pt('cubeTop', 1), pt('cubeRight', 2)]), axis: [0, 0, 1] }, show: [4.2, 99],
-      pos: track([[4.2, [7.6, -2.6, 3.4]], [5.25, [0, 0, 0.34], 'outCubic'], [5.6, [0, 0, 0], 'inOutCubic']]),
-      spin: track([[4.2, [-38, 28, 85]], [5.25, [0, 0, 0], 'outCubic']]),
+      id: 'cube', hinge: { p: centroid([pt('cubeTop', 0), pt('cubeTop', 1), pt('cubeRight', 2)]), axis: [0, 0, 1] }, show: [3.9, 99],
+      pos: track([[3.9, [1.4, -3.4, 1.4]], [5.25, [0, 0, 0.34], 'outCubic'], [5.6, [0, 0, 0], 'inOutCubic']]),
+      spin: track([[3.9, [-38, 28, 85]], [5.25, [0, 0, 0], 'outCubic']]),
       children: [
         {
           id: 'cubeTop', mesh: 'cubeTop', hinge: { p: mid(pt('cubeTop', 2), pt('cubeTop', 1)), axis: dir(pt('cubeTop', 2), pt('cubeTop', 1)) },
@@ -136,6 +148,12 @@ function logoSpecs() {
   ];
 }
 
+function barFaces() {
+  return {
+    front: ctrack([[5.4, ['#5e5a55', '#2f363c']], [6.2, flat(FINAL.charcoal)]]),
+    back: ctrack([[0, pale]]), side: ctrack([[0, flat('#b9b4aa')], [5, flat('#b9b4aa')], [6, flat('#3b4045')]]),
+  };
+}
 function slateFaces(top, bot, final) {
   return {
     front: ctrack([[5.4, [top, bot]], [6.1, flat(final)]]),
@@ -184,13 +202,20 @@ function ribbon({ id, anchor, deg, n = 4, len = 3.6, wid = 3.2, show, pos, folds
 function extraSpecs() {
   const wob = (base, amp, f, ph) => (t) => base + amp * Math.sin(t * f + ph);
   return [
+    { // ochre tip that the arm unrolls from (reference 2.3–2.9s)
+      id: 'armTip', poly: W([[682, 271], [902, 271], [740, 500]]), hinge: { p: toWorld([775, 347]), axis: [1, 0, 0] }, show: [2.28, 2.92],
+      pos: track([[2.28, [0.9, 1.1, 1.3]], [2.55, [0, 0, 0.66], 'outCubic']]),
+      spin: track([[2.28, [55, 0, 25]], [2.55, [0, 0, 0], 'outCubic']]),
+      faces: { front: ctrack([[0, ['#a3805f', '#8c6c50']]]), back: ctrack([[0, flat('#9c7a5c')]]), side: ctrack([[0, flat('#6e5a48')]]) },
+      gradFn: () => 0.5,
+    },
     { // thin pale strip on the left
-      id: 'stripL', poly: rect(-10.4, 0.4, 15, 0.7, 58), hinge: { p: [-10.4, 0.4], axis: [0, 0, 1] }, show: [1.0, 2.3],
+      id: 'stripL', poly: rect(-10.4, 0.4, 15, 0.7, 58), hinge: { p: [-10.4, 0.4], axis: [0, 0, 1] }, show: [1.05, 2.3],
       pos: track([[1.0, [-8, -3, 0.6]], [1.48, [0, 0, 0.5], 'outCubic'], [1.75, [0, 0, 0.5]], [2.3, [-10, -2, 0.5], 'inCubic']]),
       faces: paperFaces(),
     },
     { // fine crease lines left behind, sliding out slowly
-      id: 'creases', hinge: { p: [-9, -2], axis: [0, 0, 1] }, show: [1.0, 3.6],
+      id: 'creases', hinge: { p: [-9, -2], axis: [0, 0, 1] }, show: [1.05, 3.6],
       pos: track([[1.0, [-6, -2, 0]], [1.5, [0, 0, 0], 'outCubic'], [1.8, [0, 0, 0]], [3.6, [-9, -3, 0], 'inCubic']]),
       children: [
         { id: 'crease1', poly: rect(-11.2, -2.0, 11, 0.05, 60), faces: paperFaces('#fbfaf6') },
@@ -209,22 +234,25 @@ function extraSpecs() {
         },
       ],
     },
-    { // pale sheet curling up at the bottom right, just before the cube arrives
-      id: 'curl', poly: rect(7.6, -5.4, 2.6, 2.4, 20), hinge: { p: [6.4, -5.6], axis: [0.34, 0.94, 0] }, show: [3.65, 4.75],
-      pos: track([[3.65, [3, -2, 0.4]], [4.0, [0, 0, 0.4], 'outCubic'], [4.75, [5, -4, 0.6], 'inCubic']]),
-      fold: track([[3.65, 0], [4.4, 110]]),
-      faces: paperFaces(),
+    { // pale shards drifting at the left edge (reference 3.3–5.7s)
+      id: 'shardsL', hinge: { p: [-13.4, 0], axis: [0, 1, 0] }, show: [3.4, 5.75],
+      pos: track([[3.3, [-4, 0.5, 0.5]], [3.8, [0, 0, 0.5], 'outCubic'], [5.0, [0.3, -0.2, 0.5]], [5.75, [-5, -1, 0.5], 'inCubic']]),
+      fold: track([[3.3, 30], [5.75, 18]]),
+      children: [
+        { id: 'shardL1', poly: rect(-13.6, 1.8, 3.6, 2.6, 72), faces: paperFaces() },
+        { id: 'shardL2', poly: rect(-13.3, -2.2, 3.0, 2.0, 104), faces: paperFaces('#f3efe8') },
+      ],
     },
     ribbon({ // ochre → slate ribbon at the top right
-      id: 'ribbonTR', anchor: [6.9, -0.6], deg: 46, wid: 3.0, show: [3.7, 5.75],
-      pos: track([[3.7, [9, 10, 0.9]], [4.15, [0, 0, 0.9], 'outCubic'], [4.9, [0.3, 0.3, 0.9]], [5.7, [9, 10, 1.0], 'inCubic']]),
+      id: 'ribbonTR', anchor: [5.5, -5.3], deg: 52, wid: 2.6, show: [3.7, 5.75],
+      pos: track([[3.7, [8, 10, 0.9]], [4.4, [0, 0, 0.9], 'outCubic'], [4.95, [0.3, 0.3, 0.9]], [5.6, [8, 10, 1.0], 'inCubic']]),
       folds: [wob(-28, 6, 2.1, 0), wob(34, 8, 1.7, 1), wob(-18, 6, 2.4, 2), wob(12, 5, 1.9, 3)],
       colors: ['#a77f5e', '#4f5c68'],
     }),
     ribbon({ // ochre ribbon at the bottom left
-      id: 'ribbonBL', anchor: [-5.6, -5.0], deg: 214, wid: 4.0, show: [3.95, 5.75],
+      id: 'ribbonBL', anchor: [-2.3, -5.6], deg: 222, wid: 2.6, show: [3.95, 5.75],
       pos: track([[3.95, [-9, -6, 0.8]], [4.35, [0, 0, 0.8], 'outCubic'], [4.95, [-0.2, -0.2, 0.8]], [5.7, [-10, -7, 0.9], 'inCubic']]),
-      folds: [wob(22, 6, 2.0, 0.5), wob(-30, 7, 1.8, 1.5), wob(16, 5, 2.2, 2.5), wob(-10, 4, 1.6, 3.5)],
+      folds: [wob(-8, 4, 2.0, 0.5), wob(-6, 3, 1.8, 1.5), wob(-4, 3, 2.2, 2.5), wob(-3, 2, 1.6, 3.5)],
       colors: ['#b0855f', '#9b7556'],
     }),
   ];
@@ -253,6 +281,7 @@ function buildNode(spec, out, depth) {
     mesh.receiveShadow = true;
     inner.add(mesh);
     node.mats = mats;
+    node.mesh = mesh;
   }
   for (const c of spec.children || []) {
     const child = buildNode(c, out, depth + 1);
@@ -275,6 +304,7 @@ export function buildPieces() {
     for (const n of nodes) {
       const s = n.spec;
       if (s.show) n.pivot.visible = t >= s.show[0] && t < s.show[1];
+      if (s.meshShow && n.mesh) n.mesh.visible = t >= s.meshShow[0] && t < s.meshShow[1];
       if (!n.pivot.visible && n.depth === 0) continue;
       const pos = s.pos ? s.pos(t) : [0, 0, 0];
       n.pivot.position.set(n.p[0] + pos[0], n.p[1] + pos[1], pos[2] + (n.depth === 0 ? BASE_Z : 0));

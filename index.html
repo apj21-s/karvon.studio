@@ -4,218 +4,197 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <!--@head-->
-    <script><!--@introGate--></script>
+    <script>
+      /* Loader from first paint; main.js lifts it once the page is ready. Failsafe: never longer than 6s. */
+      (function (d) { d.classList.add('is-loading'); setTimeout(function () { d.classList.remove('is-loading'); }, 6000); })(document.documentElement);
+    </script>
     <style>
-      /* Critical: keep the page hidden behind the intro before the main stylesheet loads. */
-      html.intro-on, html.intro-on body { background: #e9e5df; overflow: hidden; }
-      html.intro-on #intro, html.intro-leaving #intro { display: block; }
-      #intro { display: none; position: fixed; inset: 0; z-index: 100; background: #e9e5df; }
+      /* Critical loader styles, inline so the loader is styled from the very first frame
+         (the main stylesheet can arrive a moment later, especially on the dev server). */
+      .loader { display: none; }
+      html.is-loading, html.is-loading body { background: #f7f5f0; overflow: hidden; }
+      html.is-loading body > :not(.loader) { visibility: hidden; }
+      html.is-loading .loader, html.is-leaving .loader {
+        display: grid; place-items: center; position: fixed; inset: 0; z-index: 300; background: #f7f5f0;
+      }
+      .loader__lockup { display: flex; flex-direction: column; align-items: center; }
+      .loader svg { display: block; width: clamp(72px, 9vw, 104px); height: auto; overflow: visible; }
+      .loader__word {
+        margin: 18px 0 0; font: 600 clamp(1.15rem, 0.9rem + 1vw, 1.6rem)/1 Montserrat, 'Helvetica Neue', Arial, sans-serif;
+        letter-spacing: 0.32em; padding-left: 0.32em; color: #1a1e24;
+      }
+      .loader__word span { color: #b55a30; }
+      .loader__mark polygon { transform-box: fill-box; transform-origin: center; animation: loader-piece 0.9s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: calc(var(--i) * 55ms + 120ms); }
+      @keyframes loader-piece { from { opacity: 0; transform: var(--o) rotate(calc((var(--i) - 5) * 9deg)) scale(0.7); } to { opacity: 1; transform: none; } }
+      .loader__word { animation: loader-word 1s cubic-bezier(0.16, 1, 0.3, 1) 0.75s both; }
+      @keyframes loader-word { from { opacity: 0; letter-spacing: 0.7em; } to { opacity: 1; } }
+      .loader__bar { position: absolute; left: 50%; bottom: max(40px, 8vh); width: min(180px, 40vw); height: 1px; transform: translateX(-50%); background: rgba(94, 114, 133, 0.32); }
     </style>
     <script type="module" src="./src/main.js"></script>
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
-
-    <!-- Cinematic intro (first visit per session). The page below stays in the DOM. -->
-    <div id="intro" class="intro">
-      <div class="intro__stage" aria-hidden="true">
-        <div class="intro__paper"></div>
-        <canvas class="intro__canvas"></canvas>
-        <div class="intro__lockup">
-          <div class="intro__markbox"><!--@markIntro--></div>
-          <div class="intro__word"><span>K</span><span>A</span><span>R</span><span>V</span><span>O</span><span>N</span></div>
-          <div class="intro__studio">STUDIO</div>
-        </div>
+    <div class="loader" aria-hidden="true">
+      <div class="loader__lockup">
+        <!--@markLoader-->
+        <p class="loader__word">KARVON<span>.</span>STUDIO</p>
       </div>
-      <button class="intro__skip" type="button">Skip intro</button>
+      <div class="loader__bar"></div>
     </div>
 
-    <header class="nav" id="top">
-      <div class="nav__inner wrap">
-        <a class="brand" href="#top" aria-label="KARVON.STUDIO — back to top">
-          <!--@markNav-->
-          <span class="brand__word">KARVON<span class="brand__dot">.</span><span class="brand__studio">STUDIO</span></span>
-        </a>
-        <nav class="nav__menu" aria-label="Primary">
-          <ul class="nav__list"><!--@nav--></ul>
-        </nav>
-        <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="sheet">
-          <span class="nav__toggle-label">Menu</span>
-          <span class="nav__toggle-icon" aria-hidden="true"><span></span><span></span></span>
-        </button>
-      </div>
-      <div class="sheet" id="sheet" hidden>
-        <nav aria-label="Primary (mobile)">
-          <ul class="sheet__list"><!--@navSheet--></ul>
-        </nav>
-        <p class="sheet__foot mono">Discover problems. Engineer solutions. Build products that matter.</p>
-      </div>
-    </header>
+    <a class="skip-link" href="#main">Skip to content</a>
 
     <main id="main" tabindex="-1">
-      <!-- HERO -->
-      <section class="hero" aria-labelledby="hero-title">
-        <div class="hero__inner wrap">
-          <div class="hero__copy">
-            <p class="eyebrow mono reveal">Independent product studio</p>
-            <h1 class="hero__title reveal" id="hero-title">Find the problem.<br> Build the thing that&nbsp;matters.</h1>
-            <p class="hero__lead reveal">KARVON is a studio that builds its own products. We start with a problem worth solving, study it until we understand it properly, and engineer something people can rely on. Each product gets its own name, audience and roadmap — KARVON is where they come from.</p>
-            <div class="hero__actions reveal">
-              <a class="btn btn--primary" href="#approach">See how we build<span class="btn__arrow" aria-hidden="true">→</span></a>
-              <a class="btn btn--ghost" href="#contact">Get in touch</a>
+      <!-- The page is one cinematic scroll: four scenes, each pinned and scrubbed by src/scenes/.
+           Without JS, or with reduced motion, every scene falls back to a static, readable layout. -->
+
+      <!-- HERO: the headline, then the card and the phone that plays the KARVON film -->
+      <section class="scene cine" data-scene="hero" aria-labelledby="hero-title">
+        <div class="cine__grid" aria-hidden="true"></div>
+        <div class="cine__title">
+          <p class="eyebrow mono cine__eyebrow" data-enter>Independent product studio</p>
+          <h1 class="cine__h1" id="hero-title"><span class="cine__line cine__l1" data-enter>Find the problem.</span> <span class="cine__line cine__l2" data-enter>Build the thing that&nbsp;matters.</span></h1>
+          <p class="cine__hint mono" aria-hidden="true" data-enter><span></span>Scroll</p>
+        </div>
+        <div class="cine__stage" data-enter>
+          <div class="cine__shadow" aria-hidden="true"></div>
+          <div class="cine__card">
+            <div class="cine__face">
+              <div class="cine__sheen" aria-hidden="true"></div>
+              <div class="cine__layout">
+                <div class="cine__brand">
+                  <p class="cine__brand-word" aria-hidden="true">KARVON</p>
+                  <p class="cine__brand-sub mono" aria-hidden="true"><span>.</span>Studio</p>
+                </div>
+
+                <div class="cine__center">
+                  <div class="phone-wrap">
+                    <div class="phone" role="img" aria-label="The KARVON logo film: twelve facets assemble into the K">
+                      <span class="phone__btn phone__btn--a" aria-hidden="true"></span>
+                      <span class="phone__btn phone__btn--b" aria-hidden="true"></span>
+                      <span class="phone__btn phone__btn--c" aria-hidden="true"></span>
+                      <span class="phone__btn phone__btn--d" aria-hidden="true"></span>
+                      <div class="phone__screen">
+                        <div class="film" aria-hidden="true">
+                          <div class="intro__paper"></div>
+                          <canvas class="intro__canvas"></canvas>
+                          <div class="intro__lockup">
+                            <div class="intro__markbox"><!--@markPhone--></div>
+                            <div class="intro__word"><span>K</span><span>A</span><span>R</span><span>V</span><span>O</span><span>N</span></div>
+                            <div class="intro__studio">STUDIO</div>
+                          </div>
+                        </div>
+                        <div class="phone__island" aria-hidden="true"><span></span></div>
+                        <div class="phone__glare" aria-hidden="true"></div>
+                        <div class="phone__home" aria-hidden="true"></div>
+                      </div>
+                    </div>
+                    <p class="tag"><span class="tag__node" aria-hidden="true"></span><span><strong>ACEIIIT</strong><span class="tag__sub">Live · aceiiit.in</span></span></p>
+                  </div>
+                </div>
+
+                <div class="cine__copy">
+                  <h2 class="cine__copy-title">Independent by&nbsp;design.</h2>
+                  <p class="cine__copy-text">We don't build for clients. Every product starts as a problem we chose to solve, and stays ours to ship and keep improving.</p>
+                </div>
+              </div>
             </div>
           </div>
-          <figure class="hero__figure reveal" aria-hidden="true">
-            <div class="hero__plate">
-              <!--@markHero-->
-              <span class="hero__tick hero__tick--a"></span>
-              <span class="hero__tick hero__tick--b"></span>
-            </div>
-            <figcaption class="hero__caption mono"><span>FIG. 01</span><span>Twelve facets, one mark</span></figcaption>
-          </figure>
         </div>
-        <ol class="manifest wrap mono" aria-label="Studio philosophy in three lines">
-          <li><span>01</span>Discover problems.</li>
-          <li><span>02</span>Engineer solutions.</li>
-          <li><span>03</span>Build products that matter.</li>
-        </ol>
       </section>
 
-      <!-- STUDIO / PHILOSOPHY -->
-      <section class="section studio" id="studio" aria-labelledby="studio-title">
-        <div class="wrap">
-          <p class="section__index mono reveal"><span>01</span> Studio</p>
-          <div class="studio__grid">
-            <h2 class="section__title reveal" id="studio-title">A studio for products, not&nbsp;projects.</h2>
-            <div class="studio__statement">
-              <p class="reveal">Most products fail before the first line of code — nobody checked whether the problem was real, or understood it well enough to solve it. KARVON works the other way round.</p>
-              <p class="reveal">We look for problems people actually have, study them until the shape of a good solution is clear, and only then build. We don't build for clients. What we make, we own, ship and keep improving.</p>
-            </div>
+      <!-- APPROACH: three chapters, one at a time -->
+      <section class="scene approach" id="approach" data-scene="approach" aria-labelledby="approach-title">
+        <div class="approach__inner wrap">
+          <h2 class="approach__title" id="approach-title">How a product gets built&nbsp;here.</h2>
+          <div class="rail" aria-hidden="true">
+            <span class="rail__track"><span class="rail__fill"></span></span>
+            <span class="rail__step"><i class="rail__node"></i><span class="rail__label"><span class="rail__num">01</span>Discover</span></span>
+            <span class="rail__step"><i class="rail__node"></i><span class="rail__label"><span class="rail__num">02</span>Engineer</span></span>
+            <span class="rail__step"><i class="rail__node"></i><span class="rail__label"><span class="rail__num">03</span>Launch</span></span>
           </div>
-          <ol class="tenets">
-            <li class="tenet reveal"><span class="tenet__n mono">i.</span><h3>Understand first</h3><p>Time spent on the problem is never wasted. Time spent building the wrong thing always is.</p></li>
-            <li class="tenet reveal"><span class="tenet__n mono">ii.</span><h3>Engineering over surface</h3><p>A product earns trust by working, every time. Polish follows substance, not the other way round.</p></li>
-            <li class="tenet reveal"><span class="tenet__n mono">iii.</span><h3>Useful above all</h3><p>The test of a product is simple: does it make someone's day measurably easier?</p></li>
-            <li class="tenet reveal"><span class="tenet__n mono">iv.</span><h3>Validate, then iterate</h3><p>Assumptions are tested against real use. What we learn decides what we build next.</p></li>
-            <li class="tenet reveal"><span class="tenet__n mono">v.</span><h3>Independent and long-term</h3><p>We answer to the problem and the people who have it. Products are built over years, not launch weeks.</p></li>
-          </ol>
-        </div>
-      </section>
-
-      <!-- APPROACH -->
-      <section class="section approach" id="approach" aria-labelledby="approach-title">
-        <div class="wrap">
-          <p class="section__index mono reveal"><span>02</span> Approach</p>
-          <h2 class="section__title reveal" id="approach-title">How a product gets built&nbsp;here.</h2>
-          <ol class="rail">
-            <li class="stage reveal">
-              <div class="stage__head"><span class="stage__n mono">01</span><h3 class="stage__title">Discover</h3></div>
-              <p class="stage__lead">Investigate the problem before committing to a solution.</p>
+          <ol class="stages">
+            <li class="stage">
+              <span class="stage__bg" aria-hidden="true">01</span>
+              <div class="stage__main">
+                <p class="stage__n">01 / 03</p>
+                <h3 class="stage__title">Discover</h3>
+                <p class="stage__lead">Investigate the problem before committing to a solution.</p>
+              </div>
               <ul class="stage__list">
                 <li>Who is affected, and how often</li>
                 <li>What they use today, and where it falls short</li>
                 <li>The constraints underneath the problem</li>
                 <li>Where real improvement is possible</li>
               </ul>
-              <p class="stage__out mono"><span>Output</span> A problem worth solving, and evidence that it is.</p>
             </li>
-            <li class="stage reveal">
-              <div class="stage__head"><span class="stage__n mono">02</span><h3 class="stage__title">Engineer</h3></div>
-              <p class="stage__lead">Turn the validated problem into a reliable product.</p>
+            <li class="stage">
+              <span class="stage__bg" aria-hidden="true">02</span>
+              <div class="stage__main">
+                <p class="stage__n">02 / 03</p>
+                <h3 class="stage__title">Engineer</h3>
+                <p class="stage__lead">Turn the validated problem into a reliable product.</p>
+              </div>
               <ul class="stage__list">
                 <li>Thoughtful architecture</li>
                 <li>Features that earn their place</li>
                 <li>Usability and performance</li>
                 <li>Security and maintainability</li>
               </ul>
-              <p class="stage__out mono"><span>Output</span> A product that works, every time it is used.</p>
             </li>
-            <li class="stage reveal">
-              <div class="stage__head"><span class="stage__n mono">03</span><h3 class="stage__title">Launch</h3></div>
-              <p class="stage__lead">Put the product in the hands of real users.</p>
+            <li class="stage">
+              <span class="stage__bg" aria-hidden="true">03</span>
+              <div class="stage__main">
+                <p class="stage__n">03 / 03</p>
+                <h3 class="stage__title">Launch</h3>
+                <p class="stage__lead">Put the product in the hands of real users.</p>
+              </div>
               <ul class="stage__list">
                 <li>Release to the people it was built for</li>
                 <li>Learn from how it is actually used</li>
                 <li>Improve the experience continuously</li>
                 <li>Keep developing the product</li>
               </ul>
-              <p class="stage__out mono"><span>Output</span> Real users, and a loop for learning from them.</p>
             </li>
           </ol>
         </div>
       </section>
 
-      <!-- PRODUCTS -->
-      <section class="section products" id="products" aria-labelledby="products-title">
-        <div class="wrap">
-          <p class="section__index mono reveal"><span>03</span> Products</p>
-          <h2 class="section__title reveal" id="products-title">The portfolio starts&nbsp;here.</h2>
+      <!-- PRODUCTS: ACEIIIT, in its own visual language -->
+      <section class="scene products" id="products" data-scene="products" aria-labelledby="products-title">
+        <h2 class="sr-only" id="products-title">Products</h2>
+        <div class="products__inner">
           <!--@products-->
-          <p class="products__next mono reveal"><span class="products__dash" aria-hidden="true"></span>Product 002 — more problems under investigation.</p>
         </div>
       </section>
 
-      <!-- PRINCIPLES -->
-      <section class="section principles" id="principles" aria-labelledby="principles-title">
-        <div class="wrap">
-          <p class="section__index mono reveal"><span>04</span> Principles</p>
-          <h2 class="section__title reveal" id="principles-title">What we hold every product&nbsp;to.</h2>
-          <ol class="principles__grid">
-            <li class="principle reveal"><span class="mono">P.01</span><h3>Understand before building</h3><p>No solution gets designed until the problem has been studied from the user's side.</p></li>
-            <li class="principle reveal"><span class="mono">P.02</span><h3>Solve real problems</h3><p>If people aren't already struggling with it, it isn't a problem worth a product.</p></li>
-            <li class="principle reveal"><span class="mono">P.03</span><h3>Engineer for reliability</h3><p>Correct, fast and secure by default — the unglamorous parts are the product.</p></li>
-            <li class="principle reveal"><span class="mono">P.04</span><h3>Respect the user's time</h3><p>Every screen, step and notification has to justify the attention it asks for.</p></li>
-            <li class="principle reveal"><span class="mono">P.05</span><h3>Build for real-world constraints</h3><p>Slow networks, small screens, tight budgets and limited time are design inputs, not edge cases.</p></li>
-            <li class="principle reveal"><span class="mono">P.06</span><h3>Improve through feedback</h3><p>Launch is the start of the conversation. Usage tells us what to build next.</p></li>
-          </ol>
-        </div>
-      </section>
-
-      <!-- AMBITION -->
-      <section class="section ambition" aria-labelledby="ambition-title">
-        <div class="wrap ambition__inner">
-          <p class="section__index mono reveal"><span>05</span> Beyond 001</p>
-          <h2 class="ambition__title reveal" id="ambition-title">ACEIIIT is the beginning of the portfolio, not its&nbsp;boundary.</h2>
-          <div class="ambition__body">
-            <p class="reveal">KARVON isn't tied to one industry. Wherever a problem is meaningful, underserved and solvable with careful engineering, it is a candidate for the next product.</p>
-            <p class="reveal">Some investigations become products. Many end once we understand the problem — that is what investigating is for. The ones that survive get the same treatment ACEIIIT did: a clear audience, a focused product, and years of improvement.</p>
+      <!-- CONTACT: the outro, as in the reference. The K assembles on a charcoal card, the card pulls
+           back and flies away, and the call to action behind it comes into focus. -->
+      <section class="scene contact" id="contact" data-scene="contact" aria-labelledby="contact-title">
+        <div class="contact__cta">
+          <h2 class="contact__title" id="contact-title">Have a problem worth&nbsp;solving?</h2>
+          <p class="contact__lead">Bring us a problem that deserves a better product, or an idea you want tested against reality.</p>
+          <div class="contact__actions">
+            <!--@contact-->
+            <a class="btn-modern btn-modern--dark" href="#products"><span class="btn-modern__small">See</span><span class="btn-modern__big">The work</span></a>
           </div>
         </div>
-      </section>
-
-      <!-- CONTACT -->
-      <section class="section contact" id="contact" aria-labelledby="contact-title">
-        <div class="wrap contact__inner">
-          <p class="section__index mono reveal"><span>06</span> Contact</p>
-          <h2 class="contact__title reveal" id="contact-title">Have a problem worth&nbsp;solving?</h2>
-          <p class="contact__lead reveal">If you've run into a problem that deserves a better product, have an idea you'd like to test against reality, or see an opportunity to work together — we'd like to hear about it.</p>
-          <div class="contact__action reveal"><!--@contact--></div>
+        <div class="contact__stage">
+          <div class="contact__shadow" aria-hidden="true"></div>
+          <div class="contact__card">
+            <div class="finale" aria-hidden="true">
+              <div class="finale__mark"><!--@markFinale--></div>
+              <p class="finale__word"><span>K</span><span>A</span><span>R</span><span>V</span><span>O</span><span>N</span></p>
+              <p class="finale__studio">STUDIO</p>
+            </div>
+          </div>
         </div>
       </section>
     </main>
 
     <footer class="footer">
-      <div class="wrap footer__grid">
-        <div class="footer__id">
-          <a class="brand brand--footer" href="#top" aria-label="KARVON.STUDIO — back to top">
-            <!--@markFooter-->
-            <span class="brand__word">KARVON<span class="brand__dot">.</span><span class="brand__studio">STUDIO</span></span>
-          </a>
-          <p class="footer__statement">Discover problems. Engineer solutions. Build products that matter.</p>
-          <ul class="footer__contact"><!--@footerContact--></ul>
-        </div>
-        <nav class="footer__col" aria-label="Footer">
-          <h2 class="footer__h mono">Site</h2>
-          <ul><!--@footerNav--></ul>
-        </nav>
-        <div class="footer__col">
-          <h2 class="footer__h mono">Products</h2>
-          <ul><!--@footerProducts--></ul>
-        </div>
-      </div>
-      <div class="wrap footer__base mono">
-        <p>© <span data-year><!--@year--></span> KARVON.STUDIO</p>
-        <a class="footer__top" href="#top">Back to top <span aria-hidden="true">↑</span></a>
+      <div class="wrap footer__bar">
+        <p class="footer__id"><!--@markFooter--><span>© <span data-year><!--@year--></span> KARVON.STUDIO</span></p>
+        <nav class="footer__links" aria-label="Footer"><!--@footerLinks--></nav>
       </div>
     </footer>
   </body>

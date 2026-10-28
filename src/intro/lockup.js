@@ -6,7 +6,7 @@ import { clamp01, lerp, ease } from './timeline.js';
 export const MARK_ASPECT = MARK_SIZE.h / MARK_SIZE.w;
 
 // Proportions measured from the reference's final frame (mark 234×255 px at 1280×720).
-const R = {
+export const R = {
   gapWord: 44 / 255,   // mark bottom → KARVON cap top, in mark heights
   capWord: 64 / 255,   // KARVON cap height
   gapStudio: 28 / 255, // KARVON baseline → STUDIO cap top
@@ -19,10 +19,13 @@ const R = {
 
 /** Where the mark sits in the final frame for a given viewport (CSS px). */
 export function finalRect(vw, vh) {
-  // 16:9 reproduces the reference; narrow screens keep the mark readable (≥ 44% width).
-  const w = Math.min(0.325 * vh, 0.44 * vw);
+  // 16:9 reproduces the reference. Portrait phones get as large a lockup as the KARVON
+  // wordmark allows (its ink is 1.77× the mark width; keep it within 86% of the screen),
+  // sitting a little above centre where the eye lands on a tall screen.
+  const portrait = vh > vw * 1.15;
+  const w = portrait ? Math.min(0.325 * vh, (0.86 / R.wordWidth) * vw) : Math.min(0.325 * vh, 0.44 * vw);
   const h = w * MARK_ASPECT;
-  const top = R.centerY * vh - (h * R.stackHeight) / 2;
+  const top = (portrait ? 0.465 : R.centerY) * vh - (h * R.stackHeight) / 2;
   return { x: vw / 2 - w / 2, y: top, w, h };
 }
 

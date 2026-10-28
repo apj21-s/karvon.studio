@@ -1,7 +1,7 @@
 // Three.js engine for the intro. render(t) is a pure function of time.
 import * as THREE from 'three';
 import { smooth, track, clamp01 } from './timeline.js';
-import { finalRect } from './lockup.js';
+import { finalRect, R as LOCKUP } from './lockup.js';
 import { buildPieces, MARK_WORLD } from './pieces.js';
 import { paperTexture, goboTexture } from './paper.js';
 
@@ -18,7 +18,12 @@ const pitch = track([[0, 10], [3.4, 12], [4.3, 17, 'inOutSine'], [4.8, 17], [5.4
 const roll = track([[0, 9], [4.6, 9], [5.25, 4, 'inOutSine'], [6.0, 0, 'inOutSine']]);
 const panX = track([[0, 0.45], [4.6, 0.45], [6.0, 0, 'inOutSine']]);
 // Key light: comes from the left and slightly above, low enough to stretch the window into shafts.
+// Ambient level: the reference opens brighter and settles as the lockup forms (measured mean RGB).
+const ambient = track([[0, 2.95], [3.5, 2.88], [5.0, 2.72, 'inOutSine'], [7.5, 2.6, 'inOutSine'], [10, 2.58]]);
 const lightTarget = track([[0, [-5, 3.5, 0]], [10, [3.5, -1.5, 0], 'linear']]);
+
+// Yield to the browser between heavy setup steps so scrolling never stalls while the film loads.
+const nextFrame = () => new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
 
 export async function createScene({ canvas, viewport, onFail }) {
   let vp = { ...viewport };
@@ -26,15 +31,22 @@ export async function createScene({ canvas, viewport, onFail }) {
   const small = Math.min(vp.w, vp.h) < 600;
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, lowMem ? 1.5 : 1.75));
+  // HD: render at the screen's real density (up to 3×), supersample 1× screens at 1.5×,
+  // and keep the total under a pixel budget so large desktops stay smooth.
+  const dpr = devicePixelRatio || 1;
+  const budget = Math.sqrt(6.5e6 / (vp.w * vp.h));
+  // (a small screen, like the hero's phone, is sharp at 2×; 3× there only costs GPU time)
+  renderer.setPixelRatio(Math.max(1, Math.min(Math.max(dpr, 1.5), lowMem || small ? 2 : 3, budget)));
   renderer.setSize(vp.w, vp.h, false);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.NoToneMapping;
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.VSMShadowMap;
+  // Small screens (the hero's phone) use PCF soft shadows: ~5× cheaper per frame than VSM's blur
+  // passes, and at that size a slightly smaller shadow map gives the same soft look.
+  renderer.shadowMap.type = small ? THREE.PCFSoftShadowMap : THREE.VSMShadowMap;
   renderer.setClearColor(0xe9e5df, 1);
 
-  const onLost = (e) => { e.preventDefault(); onFail?.(); };
+  const onLost = (e) => { e.preventDefault(); console.warn('[intro] WebGL context lost; finishing early'); onFail?.(); };
   canvas.addEventListener('webglcontextlost', onLost);
 
   const scene = new THREE.Scene();
@@ -48,7 +60,10 @@ export async function createScene({ canvas, viewport, onFail }) {
   const paperCy = -((fr0.y + fr0.h / 2) - vp.h / 2) / pxu;
   // Seams sit where the reference shows them (x≈1060 and x≈200 of 1280 in the final frame).
   const seams = [(1060 - 640) / 23.4, (200 - 640) / 23.4];
-  const paperTex = paperTexture({ pw, ph, cx: 0, cy: paperCy, res: small || lowMem ? 1536 : 2048, seams });
+  const paperRes = lowMem || small ? 2048 : 3072;
+  const anisotropy = renderer.capabilities.getMaxAnisotropy();
+  await nextFrame();
+  const paperTex = paperTexture({ pw, ph, cx: 0, cy: paperCy, res: paperRes, seams, anisotropy });
   const paper = new THREE.Mesh(
     new THREE.PlaneGeometry(pw, ph),
     new THREE.MeshStandardMaterial({ map: paperTex, roughness: 0.95, metalness: 0 }),
@@ -60,11 +75,12 @@ export async function createScene({ canvas, viewport, onFail }) {
   // ---- light ----
   const hemi = new THREE.HemisphereLight(0xfffdf9, 0xe4dfd6, 2.55);
   scene.add(hemi);
-  const gobo = goboTexture(512, import.meta.env.DEV && new URLSearchParams(location.search).has('gobo') ? +new URLSearchParams(location.search).get('gobo') : 90);
+  const gobo = goboTexture(1024, import.meta.env.DEV && new URLSearchParams(location.search).has('gobo') ? +new URLSearchParams(location.search).get('gobo') : 90);
   const key = new THREE.SpotLight(0xfff8ef, 2.0, 0, 0.62, 0, 0);
   key.map = gobo;
   key.castShadow = true;
-  key.shadow.mapSize.set(small || lowMem ? 1024 : 2048, small || lowMem ? 1024 : 2048);
+  // The shadows are soft (blurred VSM), so a larger map adds GPU memory, not sharpness.
+  key.shadow.mapSize.set(small ? 768 : 2048, small ? 768 : 2048);
   key.shadow.radius = 9;
   key.shadow.blurSamples = 16;
   key.shadow.bias = -0.0002;
@@ -76,8 +92,10 @@ export async function createScene({ canvas, viewport, onFail }) {
   const KEY_DIST = 70;
 
   // ---- pieces ----
+  await nextFrame();
   const pieces = buildPieces();
   scene.add(pieces.root);
+  await nextFrame();
 
   // Warm up shaders once so the first animated frame doesn't hitch.
   renderer.compile(scene, camera);
@@ -89,7 +107,11 @@ export async function createScene({ canvas, viewport, onFail }) {
     const f = finalRect(vp.w, vp.h);
     const dFinal = (10 * vp.h) / (f.w * 2 * TAN);
     // On narrow screens keep the busy assembly inside the frame.
-    const s = Math.min(zoom(t), Math.max(1, (0.7 * vp.w) / f.w));
+    const assembly = Math.max(1, (0.62 * vp.w) / f.w);
+    // Once the wordmark arrives, the whole lockup (word = 1.77× the mark) must fit the width.
+    const lockupFit = Math.max(1, (0.88 * vp.w) / (LOCKUP.wordWidth * f.w));
+    const k = clamp01((t - 5.3) / 1.0), blend = k * k * (3 - 2 * k);
+    const s = Math.min(zoom(t), assembly + (Math.min(assembly, lockupFit) - assembly) * blend);
     const d = dFinal / s;
     const px = vp.h / (2 * d * TAN); // px per unit on the paper
     // converge on this viewport's final slot (the reference's samples are for 16:9)
@@ -107,6 +129,7 @@ export async function createScene({ canvas, viewport, onFail }) {
   }
 
   function placeLight(t) {
+    hemi.intensity = ambient(t);
     const tg = lightTarget(t);
     const azim = AZIM - roll(t) * DEG; // keep the shafts' on-screen angle while the camera rolls
     key.target.position.set(tg[0], tg[1], 0);

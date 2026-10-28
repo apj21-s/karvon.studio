@@ -9,20 +9,12 @@ export const SITE = {
   // Change this if a custom domain is added — canonical, og:url and og:image use it.
   url: 'https://apj21-s.github.io/karvon.studio/',
 
-  // TODO: set the studio's contact address. While empty, the site shows no email link.
-  email: '',
+  email: 'karvon.studio@gmail.com',
 
-  title: 'KARVON.STUDIO — Discover problems. Engineer solutions. Build products that matter.',
+  title: 'KARVON.STUDIO',
   description:
     'KARVON.STUDIO is an independent product studio. We investigate meaningful problems, engineer useful solutions and turn them into independent products — starting with ACEIIIT.',
   themeColor: '#F7F5F0',
-
-  nav: [
-    { label: 'Studio', href: '#studio' },
-    { label: 'Approach', href: '#approach' },
-    { label: 'Products', href: '#products' },
-    { label: 'Contact', href: '#contact' },
-  ],
 
   // Products are rendered from this list. Add Product 002 here when it exists.
   products: [
@@ -46,6 +38,13 @@ export const SITE = {
         { title: 'Solutions and practice', text: 'Worked solutions in review, a practice mode and a study planner.' },
       ],
       flow: ['SUPR', 'REAP', 'Analysis', 'Weak areas'],
+      // ACEIIIT's own method illustrations (from the ACEIIIT design assets).
+      method: [
+        { label: 'Learn', src: 'products/aceiiit/learn.webp', w: 1400, h: 933, text: 'Notes built around the reasoning UGEE actually tests.', alt: 'ACEIIIT preparation notes: spatial reasoning and logical structure, worked through by hand' },
+        { label: 'Practice', src: 'products/aceiiit/practice.webp', w: 590, h: 870, text: 'Mock tests in the real format: SUPR, then REAP, timed like the day.', alt: 'The ACEIIIT mock portal: a UGEE 2026 mock test ready to start' },
+        { label: 'Analyse', src: 'products/aceiiit/analyse.webp', w: 620, h: 872, text: 'A diagnostic after every attempt: percentile, sections, weak areas.', alt: 'An ACEIIIT performance diagnostic: 99.2 percentile with section-wise results' },
+        { label: 'Interview', src: 'products/aceiiit/interview.webp', w: 594, h: 866, text: 'Ready for the interview round, not just the paper.', alt: 'An ACEIIIT interview brief: how to think, communicate and go beyond' },
+      ],
       links: [
         // URLs taken from the ACEIIIT codebase; confirm before launch.
         { label: 'Visit ACEIIIT', href: 'https://aceiiit.in', primary: true },
@@ -53,15 +52,4 @@ export const SITE = {
       ],
     },
   ],
-
-  intro: {
-    enabled: true,
-    // What happens on a repeat visit in the same browser session: 'skip' | 'short'
-    repeat: 'skip',
-    sessionKey: 'karvon:intro:v1',
-    duration: 10, // seconds of the full sequence
-    fadeOut: 0.8, // crossfade into the page
-    hardTimeout: 14000, // ms — the page is always released by then
-    loadTimeout: 4000, // ms — if the 3D engine isn't ready by then, use the 2D sequence
-  },
 };

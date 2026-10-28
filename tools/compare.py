@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Side-by-side contact sheet: reference video frames vs captured implementation frames.
+"""Contact sheet: reference video frame, implementation frame and their difference.
 
 Usage: python3 tools/compare.py [ours_dir] [out.png]
 Needs ffmpeg, Pillow, numpy. Reference frames are extracted to reference/frames/.
@@ -45,7 +45,7 @@ def main():
     if not files:
         sys.exit('no captured frames in ' + ours_dir)
     tw, th = 480, 270
-    sheet = Image.new('RGB', (tw * 2 + 30, (th + 24) * len(files)), (30, 30, 30))
+    sheet = Image.new('RGB', (tw * 3 + 60, (th + 24) * len(files)), (30, 30, 30))
     d = ImageDraw.Draw(sheet)
     for i, f in enumerate(files):
         t = float(re.search(r't(\d+\.\d+)', f).group(1))
@@ -56,6 +56,11 @@ def main():
         d.text((tw + 36, y + 4), 'implementation', fill=(240, 240, 240))
         sheet.paste(ref.resize((tw, th)), (0, y + 20))
         sheet.paste(ours.resize((tw, th)), (tw + 30, y + 20))
+        # Absolute difference, amplified so small mismatches stay visible.
+        diff = np.abs(np.asarray(ref.resize((tw, th))).astype(int) - np.asarray(ours.resize((tw, th))).astype(int))
+        diff = np.clip(diff.mean(2) * 3, 0, 255).astype(np.uint8)
+        d.text((tw * 2 + 66, y + 4), f'difference x3 (mean {diff.mean() / 3:.1f})', fill=(240, 240, 240))
+        sheet.paste(Image.fromarray(diff).convert('RGB'), (tw * 2 + 60, y + 20))
         if t >= 9.5:
             print(f't={t}: reference bands {bands(ref)}')
             print(f't={t}: ours      bands {bands(ours)}')

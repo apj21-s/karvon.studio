@@ -12,7 +12,7 @@ import { rng } from './timeline.js';
  * @param {number} o.res long-side resolution in px
  * @param {number[]} o.seams world x positions of vertical paper seams
  */
-export function paperTexture({ pw, ph, cx, cy, res = 2048, seams = [] }) {
+export function paperTexture({ pw, ph, cx, cy, res = 2048, seams = [], anisotropy = 4 }) {
   const W = pw >= ph ? res : Math.round((res * pw) / ph);
   const H = pw >= ph ? Math.round((res * ph) / pw) : res;
   const c = document.createElement('canvas');
@@ -26,20 +26,51 @@ export function paperTexture({ pw, ph, cx, cy, res = 2048, seams = [] }) {
   g.fillStyle = '#efece6';
   g.fillRect(0, 0, W, H);
 
-  // low-frequency tonal variation, then a finer mottle
+  // Low-frequency tonal variation, then a finer mottle. Computed in floating point at 1/8 size
+  // with random dithering, then scaled up smoothly. (Canvas gradients this faint are dithered
+  // by the browser in a regular 2px pattern, which reads as fine stripes when magnified.)
+  const LS = 8;
+  const lw = Math.ceil(W / LS), lh = Math.ceil(H / LS);
+  const buf = new Float32Array(lw * lh * 3);
+  for (let i = 0; i < lw * lh; i++) { buf[i * 3] = 239; buf[i * 3 + 1] = 236; buf[i * 3 + 2] = 230; }
   const blob = (n, rmin, rmax, aWarm, aCool) => {
-    for (let i = 0; i < n; i++) {
-      const x = rand() * W, y = rand() * H, r = (rmin + rand() * (rmax - rmin)) * Math.max(W, H);
+    for (let k = 0; k < n; k++) {
+      const x = rand() * lw, y = rand() * lh, r = Math.max(1.5, (rmin + rand() * (rmax - rmin)) * Math.max(lw, lh));
       const warm = rand() < 0.5;
-      const grd = g.createRadialGradient(x, y, 0, x, y, r);
-      grd.addColorStop(0, warm ? `rgba(196,188,176,${aWarm})` : `rgba(255,255,253,${aCool})`);
-      grd.addColorStop(1, 'rgba(0,0,0,0)');
-      g.fillStyle = grd;
-      g.fillRect(x - r, y - r, r * 2, r * 2);
+      const col = warm ? [196, 188, 176] : [255, 255, 253];
+      const a0 = warm ? aWarm : aCool;
+      const x0 = Math.max(0, Math.floor(x - r)), x1 = Math.min(lw - 1, Math.ceil(x + r));
+      const y0 = Math.max(0, Math.floor(y - r)), y1 = Math.min(lh - 1, Math.ceil(y + r));
+      for (let py = y0; py <= y1; py++) {
+        for (let px = x0; px <= x1; px++) {
+          const d = Math.hypot(px + 0.5 - x, py + 0.5 - y) / r;
+          if (d >= 1) continue;
+          // Matches the browser's own gradient (colour fades towards transparent black, unpremultiplied):
+          // the soft darkening at each blob's edge is part of the paper's tone.
+          const al = a0 * (1 - d), c = 1 - d;
+          const j = (py * lw + px) * 3;
+          buf[j] += (col[0] * c - buf[j]) * al; buf[j + 1] += (col[1] * c - buf[j + 1]) * al; buf[j + 2] += (col[2] * c - buf[j + 2]) * al;
+        }
+      }
     }
   };
   blob(70, 0.08, 0.3, 0.05, 0.06);
   blob(500, 0.004, 0.016, 0.025, 0.035);
+  const low = document.createElement('canvas');
+  low.width = lw; low.height = lh;
+  const lg = low.getContext('2d');
+  const lowImg = lg.createImageData(lw, lh);
+  for (let i = 0; i < lw * lh; i++) {
+    const dither = rand() - 0.5;
+    lowImg.data[i * 4] = buf[i * 3] + dither;
+    lowImg.data[i * 4 + 1] = buf[i * 3 + 1] + dither;
+    lowImg.data[i * 4 + 2] = buf[i * 3 + 2] + dither;
+    lowImg.data[i * 4 + 3] = 255;
+  }
+  lg.putImageData(lowImg, 0, 0);
+  g.imageSmoothingEnabled = true;
+  g.imageSmoothingQuality = 'high';
+  g.drawImage(low, 0, 0, lw * LS, lh * LS);
 
   // fibres: many short, nearly straight hairs in muted grey-brown, a few pale ones
   const fibreScale = pxPerUnit / 23; // tuned against the reference at final framing
@@ -88,7 +119,9 @@ export function paperTexture({ pw, ph, cx, cy, res = 2048, seams = [] }) {
 
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 4;
+  tex.anisotropy = anisotropy;
+  tex.generateMipmaps = true;
+  tex.minFilter = THREE.LinearMipmapLinearFilter;
   tex.needsUpdate = true;
   return tex;
 }

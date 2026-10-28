@@ -3,30 +3,23 @@ import * as R from './src/config/render.js';
 
 // Fills the <!--@slot--> placeholders in index.html from src/config/site.js,
 // so content, metadata and the intro gate config live in one place.
+// The loader's facets start slightly apart and snap together (CSS only, while the page loads).
+const LOADER_OFFSETS = {
+  chimney: [0, -60], stem: [0, 60], slateTop: [40, -70], wallSlate: [-70, -30], wallFace: [-80, 20],
+  arm: [60, -40], leg: [60, 50], slateBot: [-10, 80], charBot: [30, 90],
+  cubeTop: [110, -50], cubeMid: [120, 0], cubeRight: [140, 30],
+};
+
 function siteHtml() {
   const slots = {
     head: R.headMeta,
-    introGate: R.introConfigScript,
-    nav: () => R.navLinks('nav__link'),
-    navSheet: () => R.navLinks('sheet__link'),
-    footerNav: () => R.navLinks('footer__link'),
     products: R.products,
     contact: R.contact,
-    footerContact: R.footerContact,
-    footerProducts: R.footerProducts,
-    markNav: () => R.markSVG({ className: 'brand__mark' }),
-    markFooter: () => R.markSVG({ className: 'brand__mark' }),
-    markIntro: () => R.markSVG({ className: 'intro__mark' }),
-    markHero: () =>
-      R.markSVG({
-        className: 'hero__mark',
-        // A slightly exploded arrangement: the mark mid-assembly.
-        offsets: {
-          chimney: [0, -40], slateTop: [26, -58], wallSlate: [-58, -30], wallFace: [-70, 14],
-          arm: [34, -26], leg: [44, 30], slateBot: [-6, 70], charBot: [20, 84],
-          cubeTop: [96, -40], cubeMid: [104, 0], cubeRight: [126, 18],
-        },
-      }),
+    footerLinks: R.footerLinks,
+    markFooter: () => R.markSVG({}),
+    markLoader: () => R.markSVG({ className: 'loader__mark', offsets: LOADER_OFFSETS }),
+    markPhone: () => R.markSVG({ className: 'intro__mark' }),
+    markFinale: () => R.markSVG({ className: 'finale__svg' }),
     year: R.year,
   };
   return {

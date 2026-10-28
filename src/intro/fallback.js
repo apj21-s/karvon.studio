@@ -1,11 +1,11 @@
 // 2D engines for the intro (no WebGL, reduced motion, or a short repeat).
 // They animate the same traced mark as SVG, on the gate's clock.
-import { finalRect } from './lockup.js';
+import { finalRect, R as LOCKUP } from './lockup.js';
 import { span, ease, lerp, smooth } from './timeline.js';
 
 // Arrival order mirrors the reference: stem, arm, leg, slate & wall, bottom, cube.
 // [start, dx, dy, rotate°] — offsets in mark units (mark width = 1000).
-const ARRIVALS = {
+export const ARRIVALS = {
   chimney:   [0.30, 0, -260, -8],
   stem:      [0.30, 0, 220, 6],
   arm:       [0.65, 260, -220, 18],
@@ -21,7 +21,7 @@ const ARRIVALS = {
 };
 const PIECE_DUR = 0.75;
 
-export function createFallback({ el, lockup, mode, viewport }) {
+export function createFallback({ lockup, mode, viewport }) {
   let vp = viewport;
   const polys = [...lockup.markbox.querySelectorAll('polygon')];
 
@@ -55,7 +55,8 @@ export function createFallback({ el, lockup, mode, viewport }) {
         p.style.transform = k >= 1 ? '' : `translate(${a[1] * (1 - k)}px, ${a[2] * (1 - k)}px) rotate(${a[3] * (1 - k)}deg)`;
       }
       const f = finalRect(vp.w, vp.h);
-      const s = scale(t), w = f.w * s, h = f.h * s;
+      const fit = Math.max(1, (0.88 * vp.w) / (LOCKUP.wordWidth * f.w)); // keep the wordmark on screen
+      const s = Math.min(scale(t), fit), w = f.w * s, h = f.h * s;
       const yCentre = lerp(f.y + f.h / 2, 0.48 * vp.h, lift(t));
       return { x: vp.w / 2 - w / 2, y: yCentre - h / 2, w, h };
     },
