@@ -57,22 +57,29 @@ export function headMeta() {
 }
 
 
-// ACEIIIT, presented in its own visual language: warm paper, deep ink, a gold accent, and the
-// product's own method illustrations laid out like papers on a desk.
+// Each product gets its own pinned scene, presented in its own visual language (see .products--<id>
+// in scenes.css), with the product's screens or illustrations laid out like papers on a desk.
 export function products() {
-  return SITE.products.map((p) => {
+  return SITE.products.map((p, n) => {
     const primary = p.links.find((l) => l.primary) || p.links[0];
     const others = p.links.filter((l) => l !== primary);
+    const fullName = p.byline ? `${p.name} ${p.byline}` : p.name;
+    // the first section carries #products (the "See the work" link) and the section heading
+    const sectionId = n === 0 ? 'products' : `products-${p.id}`;
+    const heading = n === 0 ? '<h2 class="sr-only" id="products-title">Products</h2>' : '';
     return `
+      <section class="scene products products--${p.id}" id="${sectionId}" data-scene="products" aria-labelledby="${n === 0 ? 'products-title' : `product-${p.id}-name`}">
+        ${heading}
+        <div class="products__inner">
           <article class="product" id="product-${p.id}" aria-labelledby="product-${p.id}-name">
             <div class="product__intro">
               <div class="product__brand">
-                <div class="product__logo"><img src="${p.logo}" alt="${esc(p.name)} logo" width="160" height="160" decoding="async"></div>
+                <div class="product__logo"><img src="${p.logo}" alt="${esc(fullName)} logo" width="160" height="160" decoding="async"></div>
                 <p class="product__status"><span aria-hidden="true"></span>Live</p>
               </div>
-              <h3 class="product__name" id="product-${p.id}-name">${esc(p.name)}</h3>
+              <h3 class="product__name" id="product-${p.id}-name">${esc(p.name)}${p.byline ? ` <span class="product__byline">${esc(p.byline)}</span>` : ''}</h3>
               <p class="product__summary">${esc(p.summary)}</p>
-              <ol class="product__flow" aria-label="How an ${esc(p.name)} attempt flows">
+              <ol class="product__flow" aria-label="${esc(p.flowLabel || `How ${p.name} works`)}">
                 ${p.flow.map((f) => `<li>${esc(f)}</li>`).join('')}
               </ol>
               <div class="product__actions">
@@ -82,7 +89,7 @@ export function products() {
             </div>
             <div class="product__desk">
               <div class="desk">
-                ${(p.method || []).map((m, i) => `<figure class="sheet sheet--${i + 1}"><img src="${m.src}" alt="${esc(m.alt)}" width="${m.w}" height="${m.h}" decoding="async"></figure>`).join('')}
+                ${(p.method || []).map((m, i) => `<figure class="sheet sheet--${i + 1}"><img src="${m.src}" alt="${esc(m.alt)}" width="${m.w}" height="${m.h}" loading="lazy" decoding="async"></figure>`).join('')}
               </div>
               <ol class="desk__notes">
                 ${(p.method || []).map((m, i) => `<li><span class="mono">${String(i + 1).padStart(2, '0')}</span><strong>${esc(m.label)}</strong><span class="desk__text">${esc(m.text)}</span></li>`).join('')}
@@ -91,7 +98,9 @@ export function products() {
             <ul class="product__caps" aria-label="What it does">
               ${p.capabilities.map((c) => `<li><h4>${esc(c.title)}</h4><p>${esc(c.text)}</p></li>`).join('')}
             </ul>
-          </article>`;
+          </article>
+        </div>
+      </section>`;
   }).join('');
 }
 

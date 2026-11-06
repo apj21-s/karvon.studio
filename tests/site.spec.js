@@ -76,10 +76,18 @@ test.describe('content and links', () => {
     await expect(page.getByRole('link', { name: /Open the mock portal/, includeHidden: true })).toHaveAttribute('href', 'https://mock.aceiiit.in');
   });
 
-  test('product logo loads', async ({ page }) => {
+  test('every product logo loads', async ({ page }) => {
     await page.goto('/');
-    const img = page.locator('.product__logo img');
-    await expect.poll(() => img.evaluate((i) => i.complete && i.naturalWidth > 0), { timeout: 8_000 }).toBe(true);
+    const imgs = page.locator('.product__logo img');
+    await expect(imgs).toHaveCount(2);
+    await expect.poll(() => imgs.evaluateAll((all) => all.every((i) => i.complete && i.naturalWidth > 0)), { timeout: 8_000 }).toBe(true);
+  });
+
+  test('Artora links to its live shop and opens safely', async ({ page }) => {
+    await page.goto('/');
+    const link = page.getByRole('link', { name: /Visit Artora/, includeHidden: true });
+    await expect(link).toHaveAttribute('href', 'https://artorabyjune.vercel.app');
+    await expect(link).toHaveAttribute('rel', /noopener/);
   });
 
   test('a single h1 and no empty links', async ({ page }) => {
@@ -112,7 +120,7 @@ test.describe('cinematic scroll', () => {
     const errors = collectErrors(page);
     await page.goto('/');
     await ready(page);
-    await expect(page.locator('.pin-spacer')).toHaveCount(4);
+    await expect(page.locator('.pin-spacer')).toHaveCount(5);
     // the phone lands and the film plays by itself through to the finished lockup
     await page.evaluate(() => window.scrollTo(0, innerHeight * 1.8));
     await expect(page.locator('.phone-wrap')).toHaveCSS('opacity', '1', { timeout: 5_000 });

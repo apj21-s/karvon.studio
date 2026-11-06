@@ -369,6 +369,27 @@ html.lenis { scroll-padding-top: 0; }
   .scene--live .desk__notes li { border-top: 0; }
 }
 
+/* ---- Artora by June, in its own visual language: woven canvas, warm ink, cherry and ochre paint ---- */
+.products--artora {
+  --ace-bg: #e8e1d0; --ace-ink: #221d19; --ace-soft: rgba(34, 29, 25, 0.7); --ace-line: rgba(34, 29, 25, 0.14);
+  --ace-gold: #c1443c; --ace-gold-strong: #c98a2a;
+  background:
+    radial-gradient(55% 55% at 72% 40%, rgba(201, 138, 42, 0.16), transparent 70%),
+    radial-gradient(45% 55% at 8% 92%, rgba(58, 76, 166, 0.1), transparent 70%),
+    url("/products/artora/canvas.webp") 0 0 / 240px, var(--ace-bg);
+}
+.products--artora .product__name { background: none; -webkit-text-fill-color: currentColor; color: var(--ace-ink); }
+.products--artora .product__byline { font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-weight: 400; font-size: 0.42em; letter-spacing: 0; color: var(--ace-gold); white-space: nowrap; }
+.products--artora .product__logo { box-shadow: 0 10px 24px -8px rgba(59, 47, 34, 0.35), 0 0 0 1px rgba(34, 29, 25, 0.08); }
+.products--artora .product__status { background: rgba(108, 124, 92, 0.16); color: #4c5d3d; }
+.products--artora .product__status span { background: #6c7c5c; box-shadow: 0 0 0 3px rgba(108, 124, 92, 0.22); }
+.products--artora .product__flow li + li::before { background: var(--ace-gold-strong); }
+.products--artora .product__btn { border-radius: 999px; background: var(--ace-ink); color: #fbf8f1; box-shadow: 0 14px 28px -12px rgba(34, 29, 25, 0.55); }
+.products--artora .product__btn:hover { background: #3a332d; }
+.products--artora .sheet img { filter: drop-shadow(0 22px 28px rgba(59, 47, 34, 0.28)) drop-shadow(0 2px 4px rgba(59, 47, 34, 0.18)); }
+.products--artora .desk.is-focus .sheet:not(.is-active) img { filter: blur(6px) saturate(0.7); opacity: 0.45; }
+.products--artora .desk.is-focus .sheet.is-active img { filter: drop-shadow(0 36px 44px rgba(59, 47, 34, 0.38)) drop-shadow(0 4px 8px rgba(59, 47, 34, 0.2)); }
+
 /* ==========================================================================
    Contact — the outro, as in the reference: a charcoal card with the K, pulled back and flown away
    to reveal the call to action behind it. Static: the card, then the call to action.

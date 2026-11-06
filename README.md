@@ -1,5 +1,5 @@
 # karvon.studio
-KARVON.STUDIO is an independent product studio focused on turning ideas into thoughtfully engineered digital products. We build, launch, and scale technology-driven platforms that solve real-world problems, with ACEIIIT as our first venture. One studio. Multiple ideas. Built to make an impact.
+KARVON.STUDIO is an independent product studio focused on turning ideas into thoughtfully engineered digital products. We build, launch, and scale technology-driven platforms that solve real-world problems, with ACEIIIT as our first venture and Artora by June as our second. One studio. Multiple ideas. Built to make an impact.
 
 ## Running locally
 
@@ -32,6 +32,7 @@ full screen (add `&forcegl=1` in headless/software-GL browsers); `tools/capture.
 - **Contact email:** `hello.karvon.studio@gmail.com`, set in `SITE.email` (`src/config/site.js`).
 - **Domain:** `SITE.url` is the GitHub Pages URL. Change it if a custom domain is added.
 - **ACEIIIT links** (`https://aceiiit.in`, `https://mock.aceiiit.in`) were taken from the ACEIIIT code; confirm them.
+- **Artora link** (`https://artorabyjune.vercel.app`) is the live Vercel shop; update it in `site.js` if Artora moves to its own domain.
 - **Brand approval:** the K is a traced vector derived from the brand-kit PNG (silhouette IoU 0.99), and the
   wordmark is set in Montserrat as the closest match to the reference. Neither is an official source file.
 
