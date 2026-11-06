@@ -388,6 +388,14 @@ html.lenis { scroll-padding-top: 0; }
 .products--artora .product__btn:hover { background: #3a332d; }
 .products--artora .sheet img { filter: drop-shadow(0 22px 28px rgba(59, 47, 34, 0.28)) drop-shadow(0 2px 4px rgba(59, 47, 34, 0.18)); }
 .products--artora .desk.is-focus .sheet:not(.is-active) img { filter: blur(6px) saturate(0.7); opacity: 0.45; }
+/* four laptop screens, two by two, overlapping like prints on a table */
+.products--artora .sheet--1 { left: 0; top: 2%; width: 50%; rotate: -3deg; }
+.products--artora .sheet--2 { left: 48%; top: 0; width: 50%; rotate: 3deg; }
+.products--artora .sheet--3 { left: 3%; top: 44%; width: 48%; rotate: 2deg; }
+.products--artora .sheet--4 { left: 50%; top: 42%; width: 48%; rotate: -2deg; }
+@media (max-width: 1023px) {
+  .scene--live.products--artora .sheet { left: 50%; top: 50%; width: min(92%, 60svh); rotate: 0deg; }
+}
 .products--artora .desk.is-focus .sheet.is-active img { filter: drop-shadow(0 36px 44px rgba(59, 47, 34, 0.38)) drop-shadow(0 4px 8px rgba(59, 47, 34, 0.2)); }
 
 /* ==========================================================================

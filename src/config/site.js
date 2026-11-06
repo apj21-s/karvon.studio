@@ -74,12 +74,12 @@ export const SITE = {
       ],
       flow: ['Letter', 'Sketch', 'Deposit', 'Painted', 'Shipped'],
       flowLabel: 'How an Artora commission flows',
-      // Screens from the live Artora shop.
+      // Laptop screens from the live Artora shop (all wide; laid out 2x2 in .products--artora).
       method: [
         { label: 'Story', src: 'products/artora/store.webp', w: 1424, h: 900, text: 'A storefront that sells a memory, not a bag.', alt: 'The Artora by June home page: "Some moments deserve more than a photograph", beside a hand-painted tote' },
-        { label: 'Shop', src: 'products/artora/shop.webp', w: 390, h: 844, text: 'Ready-made totes, painted and waiting.', alt: 'An Artora product page on a phone: the Sunday Sun tote with a hand-painted tag' },
-        { label: 'Commission', src: 'products/artora/commission.webp', w: 390, h: 844, text: 'A letter to June, not a form.', alt: 'The Artora commission letter on a phone: "Dear June, what would you like June to paint?"' },
-        { label: 'Keepsake', src: 'products/artora/keepsake.webp', w: 390, h: 844, text: 'One of one, painted by hand and shipped pan-India.', alt: 'The Artora home page on a phone: a one-of-one tote above the headline' },
+        { label: 'Shop', src: 'products/artora/shop.webp', w: 1424, h: 900, text: 'Ready-made totes, painted one at a time.', alt: 'The Artora shop: ready-made hand-painted totes such as Sunday Sun, Movie Night and Pawprint Picnic' },
+        { label: 'Commission', src: 'products/artora/commission.webp', w: 1424, h: 900, text: 'A letter to June, not a form.', alt: 'The Artora commission letter: "Dear June, I would like you to paint...", starting with the choice of canvas' },
+        { label: 'Gifts', src: 'products/artora/gifts.webp', w: 1424, h: 900, text: 'A gift nobody else could have bought.', alt: 'The Artora gifts page: pick the occasion and the date, and June suggests what to order' },
       ],
       links: [
         { label: 'Visit Artora', href: 'https://artorabyjune.vercel.app', primary: true },
