@@ -104,6 +104,15 @@ export function products() {
   }).join('');
 }
 
+// Glass tags beside the hero phone, one per product: "<name> / Live · <site>".
+export function heroTags() {
+  return SITE.products.map((p, i) => {
+    const primary = p.links.find((l) => l.primary) || p.links[0];
+    const host = new URL(primary.href).host.replace(/^www\./, '');
+    return `<p class="tag tag--${i + 1} tag--${p.id}"><span class="tag__node" aria-hidden="true"></span><span><strong>${esc(p.byline ? `${p.name} ${p.byline}` : p.name)}</strong><span class="tag__sub">Live · ${esc(host)}</span></span></p>`;
+  }).join('\n                    ');
+}
+
 export function contact() {
   return `<a class="btn-modern btn-modern--light" href="mailto:${esc(SITE.email)}"><span class="btn-modern__small">Write to us</span><span class="btn-modern__big">${esc(SITE.email)}</span></a>`;
 }

@@ -14,6 +14,7 @@ function siteHtml() {
   const slots = {
     head: R.headMeta,
     products: R.products,
+    heroTags: R.heroTags,
     contact: R.contact,
     footerLinks: R.footerLinks,
     markFooter: () => R.markSVG({}),
